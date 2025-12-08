@@ -15,9 +15,9 @@ export function HeroPage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://placehold.co/1080x1920/1f2937/FFFFFF/svg?text=High-Energy+Trainer+Action"
-            alt="Personal Trainer in high-intensity workout"
-            className="w-full h-full object-cover opacity-30"
+            src="/images/hero-basketball.jpg"
+            alt="Basketball player dunking"
+            className="w-full h-full object-cover opacity-40"
           />
           {/* Cinematic Overlay */}
           <div className="hero-overlay absolute inset-0" />
