@@ -1,16 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from './components/ui/sonner';
+import { HeroPage } from './pages/HeroPage';
 import { BookingPage } from './pages/BookingPage';
+import { VideosPage } from './pages/VideosPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect root to a default trainer for demo */}
-        <Route path="/" element={<Navigate to="/book/sarah-johnson" replace />} />
+        {/* Landing page */}
+        <Route path="/" element={<HeroPage />} />
 
-        {/* Main booking route */}
-        <Route path="/book/:trainerSlug" element={<BookingPage />} />
+        {/* Booking form */}
+        <Route path="/book" element={<BookingPage />} />
+
+        {/* Videos/Pricing */}
+        <Route path="/videos" element={<VideosPage />} />
       </Routes>
       <Toaster />
     </BrowserRouter>

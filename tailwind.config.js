@@ -51,6 +51,16 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Electric Lime theme colors
+        'electric-lime': {
+          DEFAULT: '#D6FF00',
+          dark: '#b0d800',
+        },
+        slate: {
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
