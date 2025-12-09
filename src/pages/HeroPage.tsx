@@ -1,10 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { ValueCard } from '../components/ui/ValueCard';
+import { useTrainer } from '../context/TrainerContext';
 
 export function HeroPage() {
   const navigate = useNavigate();
+  const { handle } = useParams<{ handle: string }>();
+  const { trainer } = useTrainer();
+
+  // Use trainer's hero image if available, otherwise use default
+  const heroImageUrl = trainer?.heroImageUrl || '/images/hero-basketball.jpg';
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -15,8 +21,8 @@ export function HeroPage() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/hero-basketball.jpg"
-            alt="Basketball player dunking"
+            src={heroImageUrl}
+            alt="Hero background"
             className="w-full h-full object-cover opacity-40"
           />
           {/* Cinematic Overlay */}
@@ -42,7 +48,7 @@ export function HeroPage() {
           <div className="space-y-4">
             {/* Primary CTA: Book a Session */}
             <button
-              onClick={() => navigate('/book')}
+              onClick={() => navigate(`/${handle}/book`)}
               className="w-full py-4 px-6 rounded-xl font-extrabold uppercase tracking-widest text-lg transition duration-300 shadow-xl bg-electric-lime text-slate-900 hover:bg-electric-lime-dark hover:shadow-electric-lime/50 focus:outline-none focus:ring-4 focus:ring-electric-lime/70"
             >
               BOOK MY FREE 15-MIN INTRO
@@ -50,7 +56,7 @@ export function HeroPage() {
 
             {/* Secondary CTA: Access Videos */}
             <button
-              onClick={() => navigate('/videos')}
+              onClick={() => navigate(`/${handle}/videos`)}
               className="w-full py-4 px-6 rounded-xl font-bold uppercase tracking-widest text-lg transition duration-300 bg-slate-800 text-white border-2 border-electric-lime hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-600"
             >
               ACCESS TRAINING VIDEOS <span className="ml-2">▶️</span>

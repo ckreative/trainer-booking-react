@@ -9,6 +9,17 @@ export interface Trainer {
   sessionRate: number;
 }
 
+/**
+ * Trainer configuration returned from the public API
+ */
+export interface TrainerConfig {
+  id: string;
+  handle: string;
+  brandName: string;
+  primaryColor: string;
+  heroImageUrl: string | null;
+}
+
 export interface TimeSlot {
   time: string;
   available: boolean;

@@ -3,10 +3,11 @@ import { cn } from './utils';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  error?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, id, ...props }, ref) => {
+  ({ className, label, error, id, ...props }, ref) => {
     return (
       <div>
         {label && (
@@ -22,7 +23,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           id={id}
           className={cn(
             'w-full p-3 rounded-lg bg-slate-900 text-white',
-            'border border-slate-700',
+            'border',
+            error ? 'border-red-500' : 'border-slate-700',
             'focus:border-electric-lime focus:ring-1 focus:ring-electric-lime',
             'transition duration-150',
             'placeholder:text-gray-500',
@@ -30,6 +32,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           {...props}
         />
+        {error && (
+          <p className="mt-1 text-sm text-red-500">{error}</p>
+        )}
       </div>
     );
   }
