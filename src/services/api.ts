@@ -1,6 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const APP_KEY = import.meta.env.VITE_APP_KEY || '';
 
+// Debug: log API configuration (remove in production)
+console.log('[API Config] URL:', API_URL, '| Has App Key:', !!APP_KEY);
+
 interface ApiError {
   error: string;
   message: string;
