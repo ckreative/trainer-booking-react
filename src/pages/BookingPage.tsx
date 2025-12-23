@@ -8,7 +8,7 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { DateChip } from '../components/ui/DateChip';
 import { TimeSlot } from '../components/ui/TimeSlot';
-import { bookingService } from '../services/bookingService';
+import { bookingService, AvailableSlot } from '../services/bookingService';
 import { eventTypeService } from '../services/eventTypeService';
 import type { Booking } from '../types/booking';
 import type { EventType, DaySchedule } from '../types/eventType';
@@ -55,10 +55,13 @@ function generateAvailableDates(count: number, schedule?: DaySchedule[]): DateIn
       const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
       const monthName = date.toLocaleDateString('en-US', { month: 'short' });
       const dayNum = date.getDate();
+      const ordinal = dayNum === 1 || dayNum === 21 || dayNum === 31 ? 'st'
+        : dayNum === 2 || dayNum === 22 ? 'nd'
+        : dayNum === 3 || dayNum === 23 ? 'rd' : 'th';
 
       dates.push({
         date: `${dayName}, ${monthName} ${dayNum}`,
-        display: `${dayName} ${dayNum}`,
+        display: `${dayName} ${monthName} ${dayNum}${ordinal}`,
         isoDate: date.toISOString().split('T')[0],
         dayOfWeek,
       });
@@ -134,6 +137,8 @@ export function BookingPage() {
   const [isLoadingEventTypes, setIsLoadingEventTypes] = useState(true);
   const [selectedDate, setSelectedDate] = useState<DateInfo | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -148,27 +153,51 @@ export function BookingPage() {
     return generateAvailableDates(5, selectedEventType?.availability?.schedule);
   }, [selectedEventType]);
 
-  // Generate time slots based on selected date and event type
+  // Convert API slot format (HH:MM) to display format (h:mm AM/PM)
+  const formatSlotTime = (time: string): string => {
+    const [hourStr, minStr] = time.split(':');
+    const hour = parseInt(hourStr, 10);
+    const min = minStr || '00';
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${min} ${period}`;
+  };
+
+  // Get formatted time slots for display
   const timeSlots = useMemo(() => {
-    if (!selectedDate) return [];
-    return generateTimeSlots(
-      selectedDate.dayOfWeek,
-      selectedEventType?.availability?.schedule,
-      selectedEventType?.duration || 15
-    );
-  }, [selectedDate, selectedEventType]);
+    return availableSlots.map((slot) => formatSlotTime(slot.start));
+  }, [availableSlots]);
 
   // Reset date/time when event type changes
   const handleEventTypeChange = (eventTypeId: string) => {
     setFormData({ ...formData, eventTypeId });
     setSelectedDate(null);
     setSelectedTime(null);
+    setAvailableSlots([]);
   };
 
-  // Reset time when date changes
-  const handleDateChange = (date: DateInfo) => {
+  // Fetch available slots from API when date changes
+  const handleDateChange = async (date: DateInfo) => {
     setSelectedDate(date);
     setSelectedTime(null);
+    setAvailableSlots([]);
+
+    if (!handle || !formData.eventTypeId) return;
+
+    setIsLoadingSlots(true);
+    try {
+      const response = await bookingService.getAvailableSlots(
+        handle,
+        formData.eventTypeId,
+        date.isoDate
+      );
+      setAvailableSlots(response.slots);
+    } catch (err) {
+      console.error('Failed to fetch available slots:', err);
+      setAvailableSlots([]);
+    } finally {
+      setIsLoadingSlots(false);
+    }
   };
 
   // Fetch event types on mount
@@ -271,7 +300,6 @@ export function BookingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-900">
       <Header />
-
       <section className="flex-1 py-16 px-4 md:py-24">
         <div className="max-w-xl mx-auto">
           <h3 className="text-4xl font-extrabold text-center text-white mb-4 uppercase">
@@ -343,9 +371,6 @@ export function BookingPage() {
                   </div>
                 ) : eventTypes.length === 1 ? (
                   <div className="py-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2 uppercase tracking-wider">
-                      Session Type
-                    </label>
                     <div className="p-3 bg-slate-700 rounded-lg text-white">
                       {eventTypes[0].title} ({eventTypes[0].duration} min)
                       {eventTypes[0].description && (
@@ -356,7 +381,6 @@ export function BookingPage() {
                 ) : (
                   <Select
                     id="eventType"
-                    label="Session Type"
                     required
                     placeholder="Select a session type"
                     options={eventTypeOptions}
@@ -396,6 +420,8 @@ export function BookingPage() {
                   </label>
                   {!selectedDate ? (
                     <p className="text-gray-500 text-sm">Select a date first to see available times</p>
+                  ) : isLoadingSlots ? (
+                    <p className="text-gray-500 text-sm">Loading available times...</p>
                   ) : timeSlots.length === 0 ? (
                     <p className="text-gray-500 text-sm">No available times for this date</p>
                   ) : (
