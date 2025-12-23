@@ -1,5 +1,4 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { ValueCard } from '../components/ui/ValueCard';
 import { useTrainer } from '../context/TrainerContext';
@@ -14,8 +13,6 @@ export function HeroPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-
       {/* Hero Section */}
       <section className="relative w-full flex flex-col justify-end pb-8 md:pb-16 overflow-hidden min-h-[80vh]">
         {/* Background Image */}
